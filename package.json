@@ -1,6 +1,6 @@
 {
   "name": "astro-meta-tags",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "author": "Patrick Arminio",
   "license": "MIT",
   "description": "A Dev Toolbar extension to debug meta tags in your Astro website",
@@ -27,7 +27,8 @@
     "astro": "^4.1.0",
     "rimraf": "^5.0.5",
     "typescript": "^5.3.3",
-    "vite": "^4.5.1"
+    "vite": "^4.5.1",
+    "vite-plugin-dts": "^3.7.0"
   },
   "peerDependencies": {
     "astro": "^4.0.0"
@@ -35,12 +36,9 @@
   "files": [
     "dist/index.js",
     "dist/index.mjs",
-    "dist/types"
+    "dist/index.d.ts"
   ],
-  "types": "./dist/types/index.d.ts",
-  "dependencies": {
-    "vite-plugin-dts": "^3.7.0"
-  },
+  "types": "./dist/index.d.ts",
   "main": "dist/index.js",
   "module": "dist/index.mjs"
 }
