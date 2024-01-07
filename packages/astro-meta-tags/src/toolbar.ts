@@ -24,8 +24,6 @@ const getWindowContent = () => {
     document.querySelectorAll("meta[property^='twitter:']")
   ).map(getTagTuple);
 
-  console.log(twitterMetaTags);
-
   const getSingleTagHtml = ([property, content]: [string, string]) => {
     let contentTag: HTMLElement | Text;
     if (["og:image", "twitter:image"].includes(property)) {
