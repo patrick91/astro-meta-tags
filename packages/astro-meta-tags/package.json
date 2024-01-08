@@ -1,6 +1,6 @@
 {
     "name": "astro-meta-tags",
-    "version": "0.1.3",
+    "version": "0.2.0",
     "author": "Patrick Arminio",
     "license": "MIT",
     "description": "A Dev Toolbar extension to debug meta tags in your Astro website",

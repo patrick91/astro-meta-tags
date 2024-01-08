@@ -24,14 +24,26 @@ const getWindowContent = () => {
     document.querySelectorAll("meta[property^='twitter:']")
   ).map(getTagTuple);
 
-  console.log(twitterMetaTags);
-
   const getSingleTagHtml = ([property, content]: [string, string]) => {
+    let contentTag: HTMLElement | Text;
     if (["og:image", "twitter:image"].includes(property)) {
-      content = `<img src="${content}" />`;
+      contentTag = document.createElement("img");
+      contentTag.setAttribute("src", content);
+    } else {
+      contentTag = document.createTextNode(content);
     }
 
-    return /* html */ `<dt>${property}</dt><dd>${content}</dd>`;
+    const tagHtml = document.createDocumentFragment();
+
+    const propertyName = document.createElement("dt");
+    propertyName.textContent = property;
+
+    const propertyValue = document.createElement("dd");
+    propertyValue.append(contentTag);
+
+    tagHtml.append(propertyName, propertyValue);
+
+    return tagHtml
   };
 
   const getTagsHtml = (
@@ -39,16 +51,24 @@ const getWindowContent = () => {
     tags: [string, string][],
     wrapWithDetails = true
   ) => {
-    const dl = `<dl>${tags.map((tag) => getSingleTagHtml(tag)).join("")}</dl>`;
+    const dl = document.createElement("dl");
 
-    if (!wrapWithDetails) {
-      return dl;
+    for (const tag of tags) {
+      dl.append(getSingleTagHtml(tag));
     }
 
-    return `<details>
-      <summary>${title}</summary>
-      ${dl}
-    </details>`;
+    if (!wrapWithDetails) {
+      return dl.outerHTML;
+    }
+
+    const details = document.createElement("details");
+    
+    const summary = document.createElement("summary");
+    summary.textContent = title;
+
+    details.append(summary, dl);
+
+    return details.outerHTML;
   };
 
   const standardTags = [
