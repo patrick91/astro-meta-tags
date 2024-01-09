@@ -1,7 +1,8 @@
 {
     "name": "astro-meta-tags",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "author": "Patrick Arminio",
+    "repository": "github:patrick91/astro-meta-tags",
     "license": "MIT",
     "description": "A Dev Toolbar extension to debug meta tags in your Astro website",
     "keywords": [
@@ -16,7 +17,8 @@
         ".": "./src/index.ts"
     },
     "files": [
-        "src"
+        "src",
+        "README.md"
     ],
     "scripts": {
         "dev": "astro dev",
