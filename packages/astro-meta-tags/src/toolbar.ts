@@ -11,17 +11,19 @@ const getWindowContent = () => {
     ?.getAttribute("content");
 
   const getTagTuple = (tag: Element) =>
-    [tag.getAttribute("property"), tag.getAttribute("content")] as [
-      string,
-      string
-    ];
+    [
+      tag.getAttribute("property") || tag.getAttribute("name"),
+      tag.getAttribute("content"),
+    ] as [string, string];
 
   const ogMetaTags = Array.from(
     document.querySelectorAll("meta[property^='og:']")
   ).map(getTagTuple);
 
   const twitterMetaTags = Array.from(
-    document.querySelectorAll("meta[property^='twitter:']")
+    document.querySelectorAll(
+      "meta[property^='twitter:'], meta[name^='twitter:']"
+    )
   ).map(getTagTuple);
 
   const getSingleTagHtml = ([property, content]: [string, string]) => {
@@ -43,7 +45,7 @@ const getWindowContent = () => {
 
     tagHtml.append(propertyName, propertyValue);
 
-    return tagHtml
+    return tagHtml;
   };
 
   const getTagsHtml = (
@@ -62,7 +64,7 @@ const getWindowContent = () => {
     }
 
     const details = document.createElement("details");
-    
+
     const summary = document.createElement("summary");
     summary.textContent = title;
 
