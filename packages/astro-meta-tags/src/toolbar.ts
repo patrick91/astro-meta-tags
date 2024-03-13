@@ -10,21 +10,19 @@ const getWindowContent = () => {
     .querySelector("meta[name='description']")
     ?.getAttribute("content");
 
-  const getTagTuple = (tag: Element) =>
-    [
-      tag.getAttribute("property") || tag.getAttribute("name"),
-      tag.getAttribute("content"),
-    ] as [string, string];
+  const getTagTuple = (tag: Element, attributeName: string = "property") =>
+    [tag.getAttribute(attributeName), tag.getAttribute("content")] as [
+      string,
+      string
+    ];
 
   const ogMetaTags = Array.from(
     document.querySelectorAll("meta[property^='og:']")
-  ).map(getTagTuple);
+  ).map((tag) => getTagTuple(tag, "property"));
 
   const twitterMetaTags = Array.from(
-    document.querySelectorAll(
-      "meta[property^='twitter:'], meta[name^='twitter:']"
-    )
-  ).map(getTagTuple);
+    document.querySelectorAll("meta[name^='twitter:']")
+  ).map((tag) => getTagTuple(tag, "name"));
 
   const getSingleTagHtml = ([property, content]: [string, string]) => {
     let contentTag: HTMLElement | Text;
