@@ -10,25 +10,41 @@ const getWindowContent = () => {
     .querySelector("meta[name='description']")
     ?.getAttribute("content");
 
+  const themeColorMeta = document.querySelector("meta[name='theme-color']");
+  const themeColor = themeColorMeta?.getAttribute("content");
+
   const getTagTuple = (tag: Element, attributeName: string = "property") =>
     [tag.getAttribute(attributeName), tag.getAttribute("content")] as [
       string,
-      string
+      string,
     ];
 
   const ogMetaTags = Array.from(
-    document.querySelectorAll("meta[property^='og:']")
+    document.querySelectorAll("meta[property^='og:']"),
   ).map((tag) => getTagTuple(tag, "property"));
 
   const twitterMetaTags = Array.from(
-    document.querySelectorAll("meta[name^='twitter:']")
+    document.querySelectorAll("meta[name^='twitter:']"),
   ).map((tag) => getTagTuple(tag, "name"));
 
-  const getSingleTagHtml = ([property, content]: [string, string]) => {
+  const getSingleTagHtml = ([property, content]: [
+    string,
+    string | undefined | null,
+  ]) => {
     let contentTag: HTMLElement | Text;
+
+    if (!content) {
+      content = "N/A";
+    }
+
     if (["og:image", "twitter:image"].includes(property)) {
       contentTag = document.createElement("img");
       contentTag.setAttribute("src", content);
+    } else if (property === "Theme color" && content !== "N/A") {
+      contentTag = document.createElement("div");
+      contentTag.style.width = "100px";
+      contentTag.style.height = "20px";
+      contentTag.style.backgroundColor = content;
     } else {
       contentTag = document.createTextNode(content);
     }
@@ -48,8 +64,8 @@ const getWindowContent = () => {
 
   const getTagsHtml = (
     title: string,
-    tags: [string, string][],
-    wrapWithDetails = true
+    tags: [string, string | undefined | null][],
+    wrapWithDetails = true,
   ) => {
     const dl = document.createElement("dl");
 
@@ -76,7 +92,8 @@ const getWindowContent = () => {
     ["Canonical URL", canonicalUrl],
     ["Meta title", metaTitle],
     ["Meta description", metaDescription],
-  ].filter(([, value]) => value) as [string, string][];
+    ["Theme color", themeColor],
+  ] as [string, string | undefined | null][];
 
   let standardTagsHtml = getTagsHtml("Standard", standardTags, false);
 
