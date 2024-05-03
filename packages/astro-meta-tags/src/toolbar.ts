@@ -10,6 +10,13 @@ const getWindowContent = () => {
     .querySelector("meta[name='description']")
     ?.getAttribute("content");
 
+  // Detect theme-color meta tags
+  const themeColorMetas = document.querySelectorAll("meta[name='theme-color']");
+  const themeColors = Array.from(themeColorMetas).map(meta => ({
+    color: meta.getAttribute("content"),
+    media: meta.getAttribute("media")
+  }));
+
   const getTagTuple = (tag: Element, attributeName: string = "property") =>
     [tag.getAttribute(attributeName), tag.getAttribute("content")] as [
       string,
@@ -29,6 +36,11 @@ const getWindowContent = () => {
     if (["og:image", "twitter:image"].includes(property)) {
       contentTag = document.createElement("img");
       contentTag.setAttribute("src", content);
+    } else if (property === "theme-color") {
+      contentTag = document.createElement("div");
+      contentTag.style.width = "100px";
+      contentTag.style.height = "20px";
+      contentTag.style.backgroundColor = content;
     } else {
       contentTag = document.createTextNode(content);
     }
@@ -84,6 +96,12 @@ const getWindowContent = () => {
     ogMetaTags.length > 0 ? getTagsHtml("Open Graph", ogMetaTags) : "";
   let twitterTagsHtml =
     twitterMetaTags.length > 0 ? getTagsHtml("Twitter", twitterMetaTags) : "";
+
+  // Generate theme-color meta tags HTML
+  let themeColorTagsHtml = themeColors.length > 0 ? themeColors.map(themeColor => {
+    const colorInfo = themeColor.media ? `${themeColor.color} (${themeColor.media})` : themeColor.color;
+    return getTagsHtml("Theme Color", [["theme-color", colorInfo]], false);
+  }).join("") : getTagsHtml("Theme Color", [["theme-color", "not set"]], false);
 
   return /* html */ `
 <style>
@@ -145,6 +163,7 @@ const getWindowContent = () => {
 ${standardTagsHtml}
 ${ogTagsHtml}
 ${twitterTagsHtml}
+${themeColorTagsHtml}
 
 <hr />
 
