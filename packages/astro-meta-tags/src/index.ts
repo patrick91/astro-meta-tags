@@ -16,8 +16,13 @@ const createPlugin = (): AstroIntegration => {
 
           const importPath = path.dirname(url.fileURLToPath(import.meta.url));
           const pluginPath = path.join(importPath, "toolbar.ts");
-
-          addDevToolbarApp(pluginPath);
+          
+          addDevToolbarApp({
+            id: "astro-meta-tags",
+            name: "Meta Tags",
+            icon: "seo",
+            entrypoint: pluginPath
+          });
         }
       },
     },
