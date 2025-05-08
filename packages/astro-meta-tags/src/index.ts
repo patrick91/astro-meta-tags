@@ -1,4 +1,4 @@
-import type { AstroIntegration } from "astro";
+import type { AstroIntegration, DevToolbarAppEntry } from "astro";
 
 import path from "path";
 import url from "url";
@@ -17,7 +17,13 @@ const createPlugin = (): AstroIntegration => {
           const importPath = path.dirname(url.fileURLToPath(import.meta.url));
           const pluginPath = path.join(importPath, "toolbar.ts");
 
-          addDevToolbarApp(pluginPath);
+          const toolbarApp: DevToolbarAppEntry = {
+            id: PKG_NAME,
+            name: PKG_NAME,
+            entrypoint: pluginPath,
+          };
+
+          addDevToolbarApp(toolbarApp);
         }
       },
     },
