@@ -13,33 +13,73 @@ const getWindowContent = () => {
   const themeColorMeta = document.querySelector("meta[name='theme-color']");
   const themeColor = themeColorMeta?.getAttribute("content");
 
-  const getTagTuple = (tag: Element, attributeName: string = "property") =>
-    [tag.getAttribute(attributeName), tag.getAttribute("content")] as [
-      string,
-      string,
-    ];
+  const getTagTuple = (tag, attributeName = "property") => [
+    tag.getAttribute(attributeName) ?? "",
+    tag.getAttribute("content") ?? "",
+  ];
 
-  const ogMetaTags = Array.from(
+  const ogMetaTags: string[][] = Array.from(
     document.querySelectorAll("meta[property^='og:']"),
-  ).map((tag) => getTagTuple(tag, "property"));
+  )
+    .map((tag) => getTagTuple(tag, "property"))
+    .map(([a, b]) => [a ?? "", b ?? ""]);
 
-  const twitterMetaTags = Array.from(
+  const twitterMetaTags: string[][] = Array.from(
     document.querySelectorAll("meta[name^='twitter:']"),
-  ).map((tag) => getTagTuple(tag, "name"));
+  )
+    .map((tag) => getTagTuple(tag, "name"))
+    .map(([a, b]) => [a ?? "", b ?? ""]);
 
-  const getSingleTagHtml = ([property, content]: [
-    string,
-    string | undefined | null,
-  ]) => {
+  const alternateLinks: string[][] = Array.from(
+    document.querySelectorAll("link[rel='alternate'][hreflang]"),
+  )
+    .map((tag) => [
+      tag.getAttribute("hreflang") ?? "",
+      tag.getAttribute("href") ?? "",
+    ])
+    .map(([a, b]) => [a ?? "", b ?? ""]);
+
+  const iconLinks: string[][] = Array.from(
+    document.querySelectorAll("link[rel='icon'], link[rel='apple-touch-icon']"),
+  )
+    .map((tag) => [
+      tag.getAttribute("rel") ?? "",
+      tag.getAttribute("href") ?? "",
+      tag.getAttribute("sizes") ?? "",
+      tag.getAttribute("type") ?? "",
+    ])
+    .map(([rel, href, sizes, type]) => [
+      rel === "apple-touch-icon" ? "Apple Touch Icon" : "Favicon",
+      href ?? "",
+      sizes ? `${sizes}` : "",
+      type ?? "",
+    ])
+    .map(([label, href, sizes, type]) => [
+      sizes ? `${label} (${sizes})` : label,
+      href,
+    ]);
+
+  const getSingleTagHtml = ([property, content]: [string, string]) => {
     let contentTag: HTMLElement | Text;
 
     if (!content) {
       content = "N/A";
     }
 
-    if (["og:image", "twitter:image"].includes(property)) {
+    if (
+      ["og:image", "twitter:image"].includes(property) ||
+      property.includes("Favicon") ||
+      property.includes("Apple Touch Icon")
+    ) {
       contentTag = document.createElement("img");
       contentTag.setAttribute("src", content);
+      if (
+        property.includes("Favicon") ||
+        property.includes("Apple Touch Icon")
+      ) {
+        contentTag.style.maxWidth = "32px";
+        contentTag.style.height = "auto";
+      }
     } else if (property === "Theme color" && content !== "N/A") {
       contentTag = document.createElement("div");
       contentTag.style.width = "100px";
@@ -64,13 +104,13 @@ const getWindowContent = () => {
 
   const getTagsHtml = (
     title: string,
-    tags: [string, string | undefined | null][],
+    tags: string[][],
     wrapWithDetails = true,
   ) => {
     const dl = document.createElement("dl");
 
-    for (const tag of tags) {
-      dl.append(getSingleTagHtml(tag));
+    for (const [property, content] of tags) {
+      dl.append(getSingleTagHtml([property, content]));
     }
 
     if (!wrapWithDetails) {
@@ -90,17 +130,22 @@ const getWindowContent = () => {
   const standardTags = [
     ["Page title", pageTitle],
     ["Canonical URL", canonicalUrl],
-    ["Meta title", metaTitle],
     ["Meta description", metaDescription],
     ["Theme color", themeColor],
-  ] as [string, string | undefined | null][];
+  ].map(([k, v]) => [k ?? "", v ?? ""]);
 
-  let standardTagsHtml = getTagsHtml("Standard", standardTags, false);
+  const standardTagsHtml = getTagsHtml("Standard", standardTags, false);
 
-  let ogTagsHtml =
+  const ogTagsHtml =
     ogMetaTags.length > 0 ? getTagsHtml("Open Graph", ogMetaTags) : "";
-  let twitterTagsHtml =
+  const twitterTagsHtml =
     twitterMetaTags.length > 0 ? getTagsHtml("Twitter", twitterMetaTags) : "";
+  const alternateTagsHtml =
+    alternateLinks.length > 0
+      ? getTagsHtml("Alternate Languages", alternateLinks)
+      : "";
+  const iconTagsHtml =
+    iconLinks.length > 0 ? getTagsHtml("Icons", iconLinks) : "";
 
   return /* html */ `
 <style>
@@ -160,8 +205,10 @@ const getWindowContent = () => {
 </style>
 
 ${standardTagsHtml}
+${iconTagsHtml}
 ${ogTagsHtml}
 ${twitterTagsHtml}
+${alternateTagsHtml}
 
 <hr />
 
