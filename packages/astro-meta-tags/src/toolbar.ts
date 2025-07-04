@@ -39,6 +39,26 @@ const getWindowContent = () => {
 		])
 		.map(([a, b]) => [a ?? "", b ?? ""]);
 
+	const iconLinks: string[][] = Array.from(
+		document.querySelectorAll("link[rel='icon'], link[rel='apple-touch-icon']"),
+	)
+		.map((tag) => [
+			tag.getAttribute("rel") ?? "",
+			tag.getAttribute("href") ?? "",
+			tag.getAttribute("sizes") ?? "",
+			tag.getAttribute("type") ?? "",
+		])
+		.map(([rel, href, sizes, type]) => [
+			rel === "apple-touch-icon" ? "Apple Touch Icon" : "Favicon",
+			href ?? "",
+			sizes ? `${sizes}` : "",
+			type ?? "",
+		])
+		.map(([label, href, sizes, type]) => [
+			sizes ? `${label} (${sizes})` : label,
+			href,
+		]);
+
 	const getSingleTagHtml = ([property, content]: [string, string]) => {
 		let contentTag: HTMLElement | Text;
 
@@ -46,9 +66,13 @@ const getWindowContent = () => {
 			content = "N/A";
 		}
 
-		if (["og:image", "twitter:image"].includes(property)) {
+		if (["og:image", "twitter:image"].includes(property) || property.includes("Favicon") || property.includes("Apple Touch Icon")) {
 			contentTag = document.createElement("img");
 			contentTag.setAttribute("src", content);
+			if (property.includes("Favicon") || property.includes("Apple Touch Icon")) {
+				contentTag.style.maxWidth = "32px";
+				contentTag.style.height = "auto";
+			}
 		} else if (property === "Theme color" && content !== "N/A") {
 			contentTag = document.createElement("div");
 			contentTag.style.width = "100px";
@@ -111,6 +135,8 @@ const getWindowContent = () => {
 		twitterMetaTags.length > 0 ? getTagsHtml("Twitter", twitterMetaTags) : "";
 	const alternateTagsHtml =
 		alternateLinks.length > 0 ? getTagsHtml("Alternate Languages", alternateLinks) : "";
+	const iconTagsHtml =
+		iconLinks.length > 0 ? getTagsHtml("Icons", iconLinks) : "";
 
 	return /* html */ `
 <style>
@@ -170,6 +196,7 @@ const getWindowContent = () => {
 </style>
 
 ${standardTagsHtml}
+${iconTagsHtml}
 ${ogTagsHtml}
 ${twitterTagsHtml}
 ${alternateTagsHtml}
