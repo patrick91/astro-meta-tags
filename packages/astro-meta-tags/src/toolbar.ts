@@ -30,6 +30,15 @@ const getWindowContent = () => {
 		.map((tag) => getTagTuple(tag, "name"))
 		.map(([a, b]) => [a ?? "", b ?? ""]);
 
+	const alternateLinks: string[][] = Array.from(
+		document.querySelectorAll("link[rel='alternate'][hreflang]"),
+	)
+		.map((tag) => [
+			tag.getAttribute("hreflang") ?? "",
+			tag.getAttribute("href") ?? "",
+		])
+		.map(([a, b]) => [a ?? "", b ?? ""]);
+
 	const getSingleTagHtml = ([property, content]: [string, string]) => {
 		let contentTag: HTMLElement | Text;
 
@@ -100,6 +109,8 @@ const getWindowContent = () => {
 		ogMetaTags.length > 0 ? getTagsHtml("Open Graph", ogMetaTags) : "";
 	const twitterTagsHtml =
 		twitterMetaTags.length > 0 ? getTagsHtml("Twitter", twitterMetaTags) : "";
+	const alternateTagsHtml =
+		alternateLinks.length > 0 ? getTagsHtml("Alternate Languages", alternateLinks) : "";
 
 	return /* html */ `
 <style>
@@ -161,6 +172,7 @@ const getWindowContent = () => {
 ${standardTagsHtml}
 ${ogTagsHtml}
 ${twitterTagsHtml}
+${alternateTagsHtml}
 
 <hr />
 
