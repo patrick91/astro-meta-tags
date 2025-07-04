@@ -1,0 +1,10 @@
+node_modules/
+dist/
+build/
+.next/
+.cache/
+.parcel-cache/
+.DS_Store
+*.log
+pnpm-lock.yaml
+package-lock.json
