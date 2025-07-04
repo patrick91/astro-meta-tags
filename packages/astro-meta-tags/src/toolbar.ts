@@ -1,108 +1,107 @@
 const getWindowContent = () => {
-  const pageTitle = document.querySelector("title")?.textContent;
-  const canonicalUrl = document
-    .querySelector("link[rel='canonical']")
-    ?.getAttribute("href");
-  const metaTitle = document
-    .querySelector("meta[name='title']")
-    ?.getAttribute("content");
-  const metaDescription = document
-    .querySelector("meta[name='description']")
-    ?.getAttribute("content");
+	const pageTitle = document.querySelector("title")?.textContent;
+	const canonicalUrl = document
+		.querySelector("link[rel='canonical']")
+		?.getAttribute("href");
+	const metaTitle = document
+		.querySelector("meta[name='title']")
+		?.getAttribute("content");
+	const metaDescription = document
+		.querySelector("meta[name='description']")
+		?.getAttribute("content");
 
-  const themeColorMeta = document.querySelector("meta[name='theme-color']");
-  const themeColor = themeColorMeta?.getAttribute("content");
+	const themeColorMeta = document.querySelector("meta[name='theme-color']");
+	const themeColor = themeColorMeta?.getAttribute("content");
 
-  const getTagTuple = (tag: Element, attributeName: string = "property") =>
-    [tag.getAttribute(attributeName), tag.getAttribute("content")] as [
-      string,
-      string,
-    ];
+	const getTagTuple = (tag, attributeName = "property") => [
+		tag.getAttribute(attributeName) ?? "",
+		tag.getAttribute("content") ?? "",
+	];
 
-  const ogMetaTags = Array.from(
-    document.querySelectorAll("meta[property^='og:']"),
-  ).map((tag) => getTagTuple(tag, "property"));
+	const ogMetaTags: string[][] = Array.from(
+		document.querySelectorAll("meta[property^='og:']"),
+	)
+		.map((tag) => getTagTuple(tag, "property"))
+		.map(([a, b]) => [a ?? "", b ?? ""]);
 
-  const twitterMetaTags = Array.from(
-    document.querySelectorAll("meta[name^='twitter:']"),
-  ).map((tag) => getTagTuple(tag, "name"));
+	const twitterMetaTags: string[][] = Array.from(
+		document.querySelectorAll("meta[name^='twitter:']"),
+	)
+		.map((tag) => getTagTuple(tag, "name"))
+		.map(([a, b]) => [a ?? "", b ?? ""]);
 
-  const getSingleTagHtml = ([property, content]: [
-    string,
-    string | undefined | null,
-  ]) => {
-    let contentTag: HTMLElement | Text;
+	const getSingleTagHtml = ([property, content]: [string, string]) => {
+		let contentTag: HTMLElement | Text;
 
-    if (!content) {
-      content = "N/A";
-    }
+		if (!content) {
+			content = "N/A";
+		}
 
-    if (["og:image", "twitter:image"].includes(property)) {
-      contentTag = document.createElement("img");
-      contentTag.setAttribute("src", content);
-    } else if (property === "Theme color" && content !== "N/A") {
-      contentTag = document.createElement("div");
-      contentTag.style.width = "100px";
-      contentTag.style.height = "20px";
-      contentTag.style.backgroundColor = content;
-    } else {
-      contentTag = document.createTextNode(content);
-    }
+		if (["og:image", "twitter:image"].includes(property)) {
+			contentTag = document.createElement("img");
+			contentTag.setAttribute("src", content);
+		} else if (property === "Theme color" && content !== "N/A") {
+			contentTag = document.createElement("div");
+			contentTag.style.width = "100px";
+			contentTag.style.height = "20px";
+			contentTag.style.backgroundColor = content;
+		} else {
+			contentTag = document.createTextNode(content);
+		}
 
-    const tagHtml = document.createDocumentFragment();
+		const tagHtml = document.createDocumentFragment();
 
-    const propertyName = document.createElement("dt");
-    propertyName.textContent = property;
+		const propertyName = document.createElement("dt");
+		propertyName.textContent = property;
 
-    const propertyValue = document.createElement("dd");
-    propertyValue.append(contentTag);
+		const propertyValue = document.createElement("dd");
+		propertyValue.append(contentTag);
 
-    tagHtml.append(propertyName, propertyValue);
+		tagHtml.append(propertyName, propertyValue);
 
-    return tagHtml;
-  };
+		return tagHtml;
+	};
 
-  const getTagsHtml = (
-    title: string,
-    tags: [string, string | undefined | null][],
-    wrapWithDetails = true,
-  ) => {
-    const dl = document.createElement("dl");
+	const getTagsHtml = (
+		title: string,
+		tags: string[][],
+		wrapWithDetails = true,
+	) => {
+		const dl = document.createElement("dl");
 
-    for (const tag of tags) {
-      dl.append(getSingleTagHtml(tag));
-    }
+		for (const [property, content] of tags) {
+			dl.append(getSingleTagHtml([property, content]));
+		}
 
-    if (!wrapWithDetails) {
-      return dl.outerHTML;
-    }
+		if (!wrapWithDetails) {
+			return dl.outerHTML;
+		}
 
-    const details = document.createElement("details");
+		const details = document.createElement("details");
 
-    const summary = document.createElement("summary");
-    summary.textContent = title;
+		const summary = document.createElement("summary");
+		summary.textContent = title;
 
-    details.append(summary, dl);
+		details.append(summary, dl);
 
-    return details.outerHTML;
-  };
+		return details.outerHTML;
+	};
 
-  const standardTags = [
-    ["Page title", pageTitle],
-    ["Canonical URL", canonicalUrl],
-    ["Meta title", metaTitle],
-    ["Meta description", metaDescription],
-    ["Theme color", themeColor],
-  ] as [string, string | undefined | null][];
+	const standardTags = [
+		["Page title", pageTitle],
+		["Canonical URL", canonicalUrl],
+		["Meta description", metaDescription],
+		["Theme color", themeColor],
+	].map(([k, v]) => [k ?? "", v ?? ""]);
 
-  let standardTagsHtml = getTagsHtml("Standard", standardTags, false);
+	const standardTagsHtml = getTagsHtml("Standard", standardTags, false);
 
-  let ogTagsHtml =
-    ogMetaTags.length > 0 ? getTagsHtml("Open Graph", ogMetaTags) : "";
-  let twitterTagsHtml =
-    twitterMetaTags.length > 0 ? getTagsHtml("Twitter", twitterMetaTags) : "";
+	const ogTagsHtml =
+		ogMetaTags.length > 0 ? getTagsHtml("Open Graph", ogMetaTags) : "";
+	const twitterTagsHtml =
+		twitterMetaTags.length > 0 ? getTagsHtml("Twitter", twitterMetaTags) : "";
 
-  return /* html */ `
+	return /* html */ `
 <style>
     p, h1 {
         margin: 0;
@@ -171,9 +170,9 @@ ${twitterTagsHtml}
 };
 
 export default {
-  name: "Meta tags",
-  id: "meta-tags",
-  icon: `<svg fill="none" viewBox="0 0 24 24" height="1em" width="1em">
+	name: "Meta tags",
+	id: "meta-tags",
+	icon: `<svg fill="none" viewBox="0 0 24 24" height="1em" width="1em">
     <path fill="currentColor" d="M4 14v6h6v-2H6v-4H4z" />
     <path
         fill="currentColor"
@@ -187,13 +186,13 @@ export default {
     />
     </svg>
   `,
-  init(canvas: HTMLElement, eventTarget: EventTarget) {
-    eventTarget.addEventListener("app-toggled", () => {
-      const windowElement = document.createElement("astro-dev-toolbar-window");
+	init(canvas: HTMLElement, eventTarget: EventTarget) {
+		eventTarget.addEventListener("app-toggled", () => {
+			const windowElement = document.createElement("astro-dev-toolbar-window");
 
-      windowElement.innerHTML = getWindowContent();
+			windowElement.innerHTML = getWindowContent();
 
-      canvas.append(windowElement);
-    });
-  },
+			canvas.append(windowElement);
+		});
+	},
 };
